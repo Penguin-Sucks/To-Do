@@ -1,37 +1,45 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Daily To-Do - 180 Day Streak Tracker</title>
-  <link rel="stylesheet" href="style.css" />
-</head>
-<body>
-  <div class="container">
-    <header>
-      <h1>Daily To-Do List</h1>
-      <p>Complete tasks every day to build a 180-day streak!</p>
-    </header>
-    
-    <section class="progress-section">
-      <div id="progressBar" class="progress-bar">
-        <div id="progress" class="progress"></div>
-      </div>
-      <p id="progressText">0% Completed</p>
-    </section>
-    
-    <section class="tasks-section">
-      <ul id="taskList">
-        <!-- Tasks will be rendered here -->
-      </ul>
-    </section>
-    
-    <footer>
-      <p id="streakText">Current Streak: 0 days</p>
-      <button id="resetStreak">Reset Streak</button>
-    </footer>
-  </div>
-  
-  <script src="script.js"></script>
-</body>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Daily To-Do - 180 Day Streak Tracker</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <h1>Daily To-Do List</h1>
+        <p>Complete tasks every day to build a 180-day streak!</p>
+      </header>
+      <nav class="view-switch">
+        <button id="showTasksBtn">Show Tasks</button>
+        <button id="showCalendarBtn">Show Calendar</button>
+      </nav>
+      <section id="tasksView" class="view">
+        <div class="progress-section">
+          <div id="progressBar" class="progress-bar">
+            <div id="progress" class="progress"></div>
+          </div>
+          <p id="progressText">0% Completed</p>
+        </div>
+        <section class="tasks-section">
+          <ul id="taskList">
+            <!-- Tasks will be rendered here -->
+          </ul>
+        </section>
+      </section>
+      <section id="calendarView" class="view hidden">
+        <h2>180-Day Calendar</h2>
+        <div id="calendarGrid" class="calendar-grid">
+          <!-- Calendar grid cells will appear here -->
+        </div>
+      </section>
+      <footer>
+        <p id="streakText">Current Streak: 0 days</p>
+        <button id="resetStreak">Reset Streak</button>
+      </footer>
+    </div>
+    <script src="script.js"></script>
+  </body>
 </html>
