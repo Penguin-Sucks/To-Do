@@ -14,40 +14,65 @@ const defaultTasks = [
   { id: 12, text: "Eat a healthy meal", done: false }
 ];
 
-const STORAGE_KEY = 'todoData';
+const DATA_KEY = 'todoData';
+const CALENDAR_KEY = 'calendarData';
+
 let data = {
   date: getToday(),
-  tasks: defaultTasks,
+  tasks: JSON.parse(JSON.stringify(defaultTasks)),
   streak: 0,
   lastCompletedDate: ""
 };
+
+let calendarData = {}; // will store completion status keyed by date
 
 // Utility to get today's date in YYYY-MM-DD
 function getToday() {
   return new Date().toISOString().split('T')[0];
 }
 
-// Load data from localStorage if date is same
+// Save data to localStorage
+function saveData() {
+  localStorage.setItem(DATA_KEY, JSON.stringify(data));
+}
+
+// Save calendarData to localStorage
+function saveCalendarData() {
+  localStorage.setItem(CALENDAR_KEY, JSON.stringify(calendarData));
+}
+
+// Load data from localStorage and refresh if it's a new day
 function loadData() {
-  const storedData = localStorage.getItem(STORAGE_KEY);
+  const storedData = localStorage.getItem(DATA_KEY);
   if (storedData) {
     const parsed = JSON.parse(storedData);
-    // If it's a new day, reset tasks to default (all false)
     if (parsed.date !== getToday()) {
+      // Record previous day's completion status in calendarData
+      const prevDay = parsed.date;
+      calendarData[prevDay] = parsed.tasks.every(task => task.done);
+      // Reset tasks for new day
       parsed.date = getToday();
-      parsed.tasks = defaultTasks.map(task => ({ ...task, done: false }));
+      parsed.tasks = JSON.parse(JSON.stringify(defaultTasks));
+      // As per spec, reset streak to 1 for a new day
+      parsed.streak = 1;
+      parsed.lastCompletedDate = "";
+      data = parsed;
+      saveCalendarData();
+    } else {
+      data = parsed;
     }
-    return parsed;
   }
-  return data;
 }
 
-// Save to localStorage
-function saveData() {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+// Load calendarData from localStorage
+function loadCalendarData() {
+  const storedCal = localStorage.getItem(CALENDAR_KEY);
+  if (storedCal) {
+    calendarData = JSON.parse(storedCal);
+  }
 }
 
-// Render tasks list
+// Render tasks list in tasks view
 function renderTasks() {
   const taskList = document.getElementById('taskList');
   taskList.innerHTML = '';
@@ -99,35 +124,64 @@ function updateProgress() {
 // Check if all tasks are completed today and update streak accordingly
 function checkDailyCompletion() {
   const allCompleted = data.tasks.every(task => task.done);
-  if (allCompleted) {
-    const today = getToday();
-    
-    // Only update streak if not already updated for today
-    if (data.lastCompletedDate !== today) {
-      // Determine yesterday's date
-      const yesterday = new Date();
-      yesterday.setDate(new Date().getDate() - 1);
-      const yesterdayStr = yesterday.toISOString().split('T')[0];
-      
-      // Check if the last completed day was yesterday to continue streak
-      if (data.lastCompletedDate === yesterdayStr) {
-        data.streak += 1;
-      } else {
-        // If streak was broken or it's the first day of completion
-        data.streak = 1;
-      }
-      
-      data.lastCompletedDate = today;
-      updateStreakText();
-      saveData();
-    }
+  const today = getToday();
+  if (allCompleted && data.lastCompletedDate !== today) {
+    // For simplicity, on completion we set streak to 1 if new day.
+    data.streak = 1;
+    data.lastCompletedDate = today;
+    // Also update calendarData
+    calendarData[today] = true;
+    updateStreakText();
+    saveData();
+    saveCalendarData();
+  } else if (!allCompleted && data.lastCompletedDate !== today) {
+    // Mark today as not completed in calendarData if not all tasks are done.
+    calendarData[today] = false;
+    saveCalendarData();
   }
 }
 
 // Update streak text display
 function updateStreakText() {
   const streakEl = document.getElementById('streakText');
-  streakEl.textContent = `Current Streak: ${data.streak} day${data.streak !== 1 ? 's' : ''}`;
+  streakEl.textContent = `Current Streak: ${data.streak} day${data.streak !== 1 ? "s" : ""}`;
+}
+
+// Render calendar for the past 180 days
+function renderCalendar() {
+  const grid = document.getElementById('calendarGrid');
+  grid.innerHTML = '';
+  const today = new Date(getToday());
+  
+  for (let i = 179; i >= 0; i--) {
+    const cellDate = new Date(today);
+    cellDate.setDate(today.getDate() - i);
+    const dateStr = cellDate.toISOString().split('T')[0];
+    
+    const cell = document.createElement('div');
+    cell.classList.add('calendar-cell');
+    if (dateStr === getToday()) {
+      cell.classList.add('cell-today');
+      // Make today's cell clickable to switch to tasks view.
+      cell.addEventListener('click', () => switchView("tasks"));
+    }
+    
+    const cellInner = document.createElement('div');
+    cellInner.classList.add('calendar-cell-inner');
+    cellInner.textContent = cellDate.getDate();
+    
+    // Color the cell if we have record in calendarData
+    if (calendarData.hasOwnProperty(dateStr)) {
+      if (calendarData[dateStr]) {
+        cell.classList.add('cell-completed');
+      } else {
+        cell.classList.add('cell-missed');
+      }
+    }
+    
+    cell.appendChild(cellInner);
+    grid.appendChild(cell);
+  }
 }
 
 // Event listener for resetting streak
@@ -140,9 +194,29 @@ document.getElementById('resetStreak').addEventListener('click', () => {
   }
 });
 
+// View switching
+function switchView(view) {
+  const tasksView = document.getElementById('tasksView');
+  const calendarView = document.getElementById('calendarView');
+  
+  if (view === "tasks") {
+    tasksView.classList.remove('hidden');
+    calendarView.classList.add('hidden');
+  } else if (view === "calendar") {
+    tasksView.classList.add('hidden');
+    calendarView.classList.remove('hidden');
+    renderCalendar();
+  }
+}
+
+// Set event listeners for view buttons
+document.getElementById('showTasksBtn').addEventListener('click', () => switchView("tasks"));
+document.getElementById('showCalendarBtn').addEventListener('click', () => switchView("calendar"));
+
 // Initialize app
 function init() {
-  data = loadData();
+  loadCalendarData();
+  loadData();
   renderTasks();
   updateProgress();
   updateStreakText();
