@@ -1,0 +1,89 @@
+/* Global Styles */
+body {
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  background-color: #f5f7fa;
+  margin: 0;
+  padding: 0;
+}
+
+/* Container */
+.container {
+  max-width: 600px;
+  margin: 40px auto;
+  padding: 20px;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+/* Header */
+header {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+header h1 {
+  margin-bottom: 10px;
+}
+
+/* Progress Section */
+.progress-section {
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.progress-bar {
+  width: 100%;
+  background-color: #e0e0e0;
+  border-radius: 25px;
+  overflow: hidden;
+  height: 20px;
+}
+
+.progress {
+  height: 100%;
+  width: 0%;
+  background-color: #76c7c0;
+  transition: width 0.5s ease;
+}
+
+/* Task Section */
+.tasks-section ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.task {
+  background-color: #fafafa;
+  margin: 10px 0;
+  padding: 15px;
+  border-radius: 5px;
+  display: flex;
+  align-items: center;
+  border: 1px solid #e0e0e0;
+}
+
+.task input[type="checkbox"] {
+  margin-right: 15px;
+  transform: scale(1.4);
+}
+
+/* Footer */
+footer {
+  text-align: center;
+  margin-top: 20px;
+}
+
+button {
+  background-color: #76c7c0;
+  color: #fff;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #5aa9a4;
+}
